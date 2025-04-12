@@ -38,3 +38,25 @@ impl Default for MapConfig {
         }
     }
 }
+
+pub struct RefinerConfig {
+    pub height_offset: f32,
+    pub height_coeff: f32,
+    pub height_exponent: f32,
+    pub smoothness: f32,
+    pub curve_points: Option<Vec<(f32, f32)>>,
+    pub paint_map_overlay: Option<Vec<f32>>,
+}
+
+impl Default for RefinerConfig {
+    fn default() -> Self {
+        Self {
+            height_offset: 0.0,
+            height_coeff: 1.0,
+            height_exponent: 1.0,
+            smoothness: 0.0,
+            curve_points: None,
+            paint_map_overlay: None,
+        }
+    }
+}

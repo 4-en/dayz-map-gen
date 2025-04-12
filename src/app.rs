@@ -1,4 +1,4 @@
-use crate::{config::MapConfig, preview::get_color_for_height, terrain::generate_map};
+use crate::{config::MapConfig, preview::get_color_for_height, terrain::generate_map, config::RefinerConfig, refiner::refine_heightmap};
 use eframe::egui;
 use image::{ImageBuffer, Rgba};
 
@@ -30,6 +30,7 @@ impl Copy for GenerationStep {}
 pub struct DayZMapApp {
     current_step: GenerationStep,
     config: MapConfig,
+    refiner_config: RefinerConfig,
     preview_texture: Option<egui::TextureHandle>,
     preview_image: Option<ImageBuffer<Rgba<u8>, Vec<u8>>>,
     heightmap_data: Option<Vec<f32>>,
@@ -40,6 +41,7 @@ impl Default for DayZMapApp {
         Self {
             current_step: GenerationStep::Terrain,
             config: MapConfig::default(),
+            refiner_config: RefinerConfig::default(),
             preview_texture: None,
             preview_image: None,
             heightmap_data: None,
@@ -180,10 +182,6 @@ impl DayZMapApp {
     }
 
     fn render_refine_settings(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) {
-        ui.heading("Refine Heightmap");
-        ui.separator();
-
-        /*
 
         // Curve controls
         ui.collapsing("Height Curve", |ui| {
@@ -191,18 +189,64 @@ impl DayZMapApp {
             // Presets: Linear, Steep Peaks, Flatlands, etc.
         });
 
-        // Other refinement sliders
-        ui.checkbox(&mut self.config.apply_terracing, "Terracing");
-        if self.config.apply_terracing {
-            ui.add(
-                egui::Slider::new(&mut self.config.terrace_levels, 2..=20).text("Terrace Levels"),
-            );
-        }
+        ui.label("Sea Level:");
+        ui.add(egui::Slider::new(&mut self.config.sea_level, 0.0..=1.0).text("Sea Level"));
+
+        ui.label("Height Offset:");
+        ui.add(egui::Slider::new(&mut self.refiner_config.height_offset, -1.0..=1.0).text("Height Offset"));
+
+        // coeff for height (height * coeff + offset)
+        ui.label("Height Coefficient:");
+        ui.add(egui::Slider::new(&mut self.refiner_config.height_coeff, 0.0..=10.0).text("Height Coefficient"));
+
+        // exp for height (height ^ exp + offset)
+        ui.label("Height Exponent:");
+        ui.add(egui::Slider::new(&mut self.refiner_config.height_exponent, 0.0..=10.0).text("Height Exponent"));
+
+        // smoothness of the heightmap (0.0 = no smoothing, 1.0 = full smoothing)
+        ui.label("Smoothing Factor:");
+        ui.add(egui::Slider::new(&mut self.refiner_config.smoothness, 0.0..=1.0).text("Smoothing Factor"));
+
+        // TODO: connect this and add following features:
+        // - smoothing factor (taking into account cliffs and other features)
+        // - Curve points (add/remove points, adjust curve shape, similar to photoshop/gimp curves)
+        // - Paint map overlay (load a texture and use it to modify the heightmap using "sculpting" tools like "raise/lower, smooth, etc.)"
+        // - "live" preview using smaller texture (512x512) and a "preview" button to generate the full heightmap
+        // - "Apply" button to apply the changes to the heightmap and update the preview
+
 
         if ui.button("Apply Refinement").clicked() {
-            self.refine_heightmap();
+            let refined_heightmap = refine_heightmap(
+                self.heightmap_data.as_ref().unwrap(),
+                &self.refiner_config,
+                &self.config,
+            );
+            let (w, h) = (self.config.width, self.config.height);
+            let mut preview = ImageBuffer::new(w, h);
+            for y in 0..h {
+                for x in 0..w {
+                    let i = (y * w + x) as usize;
+                    let h = refined_heightmap[i];
+                    let (r, g, b) = get_color_for_height(h as f64, self.config.sea_level);
+                    preview.put_pixel(x, y, Rgba([r, g, b, 255]));
+                }
+            }
+            self.preview_image = Some(preview.clone());
+            let color_image = egui::ColorImage {
+                size: [w as usize, h as usize],
+                pixels: preview
+                    .pixels()
+                    .map(|p| egui::Color32::from_rgb(p[0], p[1], p[2]))
+                    .collect(),
+            };
+            self.preview_texture = Some(ctx.load_texture(
+                "preview",
+                color_image,
+                egui::TextureOptions::default(),
+            ));
+            self.heightmap_data = Some(refined_heightmap);
+            
         }
-        */
     }
 
     fn render_water_settings(&mut self, _ui: &mut egui::Ui) { /* lake threshold, river toggles */

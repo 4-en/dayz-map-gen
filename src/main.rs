@@ -2,6 +2,7 @@ mod app;
 mod config;
 mod terrain;
 mod preview;
+mod refiner;
 
 fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions::default();
