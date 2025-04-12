@@ -15,6 +15,7 @@ pub struct MapConfig {
     pub island_curve: f64,
     pub sea_level: f64,
     pub mountainous: f64,
+    pub overlay: f64,
 }
 
 impl Default for MapConfig {
@@ -35,6 +36,7 @@ impl Default for MapConfig {
             scale_detail: 25.0,
             amp_detail: 0.15,
             mountainous: 1.0,
+            overlay: 100.0,
         }
     }
 }

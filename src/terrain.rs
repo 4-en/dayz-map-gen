@@ -5,12 +5,19 @@ use eframe::egui;
 use crate::config::MapConfig;
 use crate::preview::get_color_for_height;
 
-pub fn generate_map(config: &MapConfig, seed: u32) -> (egui::ColorImage, ImageBuffer<Rgba<u8>, Vec<u8>>, Vec<f32>) {
+pub fn generate_map(config: &MapConfig, seed: u32, previous_map: &Option<Vec<f32>>) -> (egui::ColorImage, ImageBuffer<Rgba<u8>, Vec<u8>>, Vec<f32>) {
     let perlin = Perlin::new().set_seed(seed);
     let width = config.width;
     let height = config.height;
     let mut preview = ImageBuffer::new(width, height);
     let mut heightmap = vec![0.0f32; (width * height) as usize];
+
+    let overlay_strength = (config.overlay / 100.0).clamp(0.0, 1.0);
+    let overlay_old = 1.0 - overlay_strength;
+    // check if strength is below 1 and if old map is provided and same size
+    let overlay: bool = overlay_strength < 0.999 && previous_map.is_some() && previous_map.as_ref().unwrap().len() == (width * height) as usize;
+    let previous_ref = previous_map.as_ref();
+
 
     let max_mountainous = 1.5_f64.powf(config.mountainous) - 0.5;
     let max_amp = max_mountainous * config.amp_base + config.amp_mid + config.amp_detail;
@@ -57,6 +64,11 @@ pub fn generate_map(config: &MapConfig, seed: u32) -> (egui::ColorImage, ImageBu
                 let edge_strength = edge_strength_x + edge_strength_y;
                 let falloff = 1.0 - edge_strength.powf(curve);
                 h *= falloff;
+            }
+
+            if overlay {
+                let old_height = previous_ref.unwrap()[(y * width + x) as usize] as f64;
+                h = h * overlay_strength + old_height * overlay_old;
             }
 
             row_data.push((h as f32, get_color_for_height(h as f64, config.sea_level)));

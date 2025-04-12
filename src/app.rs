@@ -141,6 +141,9 @@ impl DayZMapApp {
         ui.add(egui::Slider::new(&mut self.config.amp_detail, 0.0..=2.0).text("Amp").clamp_to_range(false));
 
         ui.separator();
+        ui.label("Overlay Generation");
+        ui.add(egui::Slider::new(&mut self.config.overlay, 0.0..=100.0).text("Overlay Strength").clamp_to_range(false));
+
         ui.horizontal(|ui| {
             if ui.button("Generate Map").clicked() {
                 let seed = if self.config.use_random_seed {
@@ -151,7 +154,7 @@ impl DayZMapApp {
                     self.config.seed
                 };
 
-                let (color_image, preview_img, heightmap_data) = generate_map(&self.config, seed);
+                let (color_image, preview_img, heightmap_data) = generate_map(&self.config, seed, &self.heightmap_data);
                 self.preview_texture =
                     Some(ctx.load_texture("preview", color_image, egui::TextureOptions::default()));
                 self.preview_image = Some(preview_img);
