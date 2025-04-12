@@ -81,6 +81,23 @@ impl DayZMapApp {
             }
         });
 
+        ui.horizontal(|ui| {
+            ui.label("Quick Resize:");
+            for &size in [0.25, 0.5, 2.0, 4.0].iter() {
+                if ui.button(format!("{:.2}x", size)).clicked() {
+                    self.config.width = (self.config.width as f32 * size) as u32;
+                    self.config.height = (self.config.height as f32 * size) as u32;
+                    self.config.scale_base = (self.config.scale_base as f32 * size) as f64;
+                    self.config.scale_mid = (self.config.scale_mid as f32 * size) as f64;
+                    self.config.scale_detail = (self.config.scale_detail as f32 * size) as f64;
+
+
+                }
+            }
+        });
+
+        ui.separator();
+
         ui.checkbox(&mut self.config.use_random_seed, "Use Random Seed");
 
         if !self.config.use_random_seed {
@@ -110,16 +127,16 @@ impl DayZMapApp {
         ui.heading("Noise Layers");
 
         ui.label("Base Noise");
-        ui.add(egui::Slider::new(&mut self.config.scale_base, 10.0..=10000.0).text("Scale"));
-        ui.add(egui::Slider::new(&mut self.config.amp_base, 0.0..=2.0).text("Amp"));
+        ui.add(egui::Slider::new(&mut self.config.scale_base, 10.0..=10000.0).text("Scale").clamp_to_range(false));
+        ui.add(egui::Slider::new(&mut self.config.amp_base, 0.0..=2.0).text("Amp").clamp_to_range(false));
 
         ui.label("Mid Noise");
-        ui.add(egui::Slider::new(&mut self.config.scale_mid, 10.0..=1000.0).text("Scale"));
-        ui.add(egui::Slider::new(&mut self.config.amp_mid, 0.0..=2.0).text("Amp"));
+        ui.add(egui::Slider::new(&mut self.config.scale_mid, 10.0..=1000.0).text("Scale").clamp_to_range(false));
+        ui.add(egui::Slider::new(&mut self.config.amp_mid, 0.0..=2.0).text("Amp").clamp_to_range(false));
 
         ui.label("Detail Noise");
-        ui.add(egui::Slider::new(&mut self.config.scale_detail, 5.0..=100.0).text("Scale"));
-        ui.add(egui::Slider::new(&mut self.config.amp_detail, 0.0..=2.0).text("Amp"));
+        ui.add(egui::Slider::new(&mut self.config.scale_detail, 5.0..=100.0).text("Scale").clamp_to_range(false));
+        ui.add(egui::Slider::new(&mut self.config.amp_detail, 0.0..=2.0).text("Amp").clamp_to_range(false));
 
         ui.separator();
         ui.horizontal(|ui| {
