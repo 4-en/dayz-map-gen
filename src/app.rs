@@ -1,6 +1,6 @@
 use crate::{preview::get_color_for_height, terrain::generate_map, refiner::refine_heightmap};
 use crate::config::{BiomeConfig, MapConfig, RefinerConfig};
-use crate::biomes::{Biome, generate_biome_map};
+use crate::biomes::generate_biome_map;
 use eframe::egui;
 use image::{ImageBuffer, Rgba};
 
@@ -37,7 +37,7 @@ pub struct DayZMapApp {
     preview_texture: Option<egui::TextureHandle>,
     preview_image: Option<ImageBuffer<Rgba<u8>, Vec<u8>>>,
     heightmap_data: Option<Vec<f32>>,
-    biome_map: Option<Vec<Biome>>,
+    biome_map: Option<Vec<u8>>,
 }
 
 impl Default for DayZMapApp {
@@ -272,15 +272,28 @@ impl DayZMapApp {
         }
     }
 
-    fn render_water_settings(&mut self, _ui: &mut egui::Ui) { /* lake threshold, river toggles */
-    }
-    fn render_biome_settings(&mut self, ui: &mut egui::Ui) { /* biome slider ranges */
+
+    fn render_biome_settings(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) { /* biome slider ranges */
+
+
+        ui.checkbox(&mut self.biome_config.use_random_seed, "Use Random Seed");
+
+        if !self.biome_config.use_random_seed {
+            ui.label("Seed:");
+            ui.add(egui::DragValue::new(&mut self.biome_config.seed).speed(1));
+        } else {
+            ui.label(format!("Random Seed: {}", self.biome_config.seed));
+        }
+
+        ui.separator();
+        ui.label("Biome Scale:");
+        ui.add(egui::Slider::new(&mut self.biome_config.scale, 0.0..=20000.0).text("Biome Scale").clamp_to_range(false));
 
         ui.label("Base Temperature:");
-        ui.add(egui::Slider::new(&mut self.biome_config.base_temperature, 0.0..=50.0).text("Base Temperature"));
+        ui.add(egui::Slider::new(&mut self.biome_config.base_temperature, -10.0..=40.0).text("Base Temperature"));
 
         ui.label("Temperature Variation:");
-        ui.add(egui::Slider::new(&mut self.biome_config.temperature_variation, 0.0..=50.0).text("Temperature Variation"));
+        ui.add(egui::Slider::new(&mut self.biome_config.temperature_variation, 0.0..=100.0).text("Temperature Variation"));
 
         ui.label("Base Humidity:");
         ui.add(egui::Slider::new(&mut self.biome_config.base_humidity, 0.0..=100.0).text("Base Humidity"));
@@ -289,17 +302,35 @@ impl DayZMapApp {
         ui.add(egui::Slider::new(&mut self.biome_config.humidity_variation, 0.0..=100.0).text("Humidity Variation"));
 
         ui.label("Biome Blend Factor:");
-        ui.add(egui::Slider::new(&mut self.biome_config.biome_blend_factor, 0.0..=1.0).text("Biome Blend Factor"));
+        ui.add(egui::Slider::new(&mut self.biome_config.biome_blend_factor, 0.0..=100.0).text("Biome Blend Factor"));
 
 
         if ui.button("Generate Biome Map").clicked() {
             if let Some(heightmap) = &self.heightmap_data {
-                let biome_map = generate_biome_map(&self.config, &self.biome_config, heightmap);
-                self.biome_map = Some(biome_map);
+
+                let mut seed = self.biome_config.seed;
+                if self.biome_config.use_random_seed {
+                    seed = rand::random::<u32>();
+                    self.biome_config.seed = seed;
+                }
+
+                let (color_image, preview, biome)  = generate_biome_map(&self.config, &self.biome_config, heightmap, seed);
+                self.biome_map = Some(biome);
+                self.preview_texture = Some(ctx.load_texture("preview", color_image, egui::TextureOptions::default()));
+                self.preview_image = Some(preview);
+
+
+            } else {
+                ui.label("Please load a heightmap first.");
             }
         }
 
     }
+
+    fn render_water_settings(&mut self, _ui: &mut egui::Ui) { /* lake threshold, river toggles */
+    }
+
+
     fn render_object_settings(&mut self, _ui: &mut egui::Ui) { /* trees, building densities */
     }
 
@@ -363,7 +394,7 @@ impl eframe::App for DayZMapApp {
                     }
 
                     GenerationStep::Biomes => {
-                        self.render_biome_settings(ui);
+                        self.render_biome_settings(ui, ctx);
                     }
 
                     GenerationStep::Objects => {

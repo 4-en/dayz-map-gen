@@ -67,36 +67,22 @@ pub struct BiomeConfig {
     pub temperature_variation: f32,
     pub humidity_variation: f32,
     pub biome_blend_factor: f32,
+    pub scale: f64,
+    pub seed: u32,
+    pub use_random_seed: bool,
 }
 
 impl Default for BiomeConfig {
     fn default() -> Self {
         Self {
-            base_temperature: 0.5,
-            base_humidity: 0.5,
-            temperature_variation: 0.1,
-            humidity_variation: 0.1,
+            base_temperature: 15.0,
+            base_humidity: 50.0,
+            temperature_variation: 20.0,
+            humidity_variation: 20.0,
             biome_blend_factor: 0.5,
-        }
-    }
-}
-impl BiomeConfig {
-    pub fn new(base_temperature: f32, base_humidity: f32) -> Self {
-        Self {
-            base_temperature,
-            base_humidity,
-            ..Default::default()
-        }
-    }
-}
-impl BiomeConfig {
-    pub fn with_variation(base_temperature: f32, base_humidity: f32, temperature_variation: f32, humidity_variation: f32) -> Self {
-        Self {
-            base_temperature,
-            base_humidity,
-            temperature_variation,
-            humidity_variation,
-            ..Default::default()
+            scale: 10000.0,
+            seed: 12345,
+            use_random_seed: true,
         }
     }
 }
