@@ -1,5 +1,5 @@
 use crate::{preview::get_color_for_height, terrain::generate_map, refiner::refine_heightmap};
-use crate::config::{BiomeConfig, MapConfig, RefinerConfig};
+use crate::config::{BiomeConfig, MapConfig, RefinerConfig, WaterConfig};
 use crate::biomes::generate_biome_map;
 use eframe::egui;
 use image::{ImageBuffer, Rgba};
@@ -34,6 +34,7 @@ pub struct DayZMapApp {
     config: MapConfig,
     refiner_config: RefinerConfig,
     biome_config: BiomeConfig,
+    water_config: WaterConfig,
     preview_texture: Option<egui::TextureHandle>,
     preview_image: Option<ImageBuffer<Rgba<u8>, Vec<u8>>>,
     heightmap_data: Option<Vec<f32>>,
@@ -47,6 +48,7 @@ impl Default for DayZMapApp {
             config: MapConfig::default(),
             refiner_config: RefinerConfig::default(),
             biome_config: BiomeConfig::default(),
+            water_config: WaterConfig::default(),
             preview_texture: None,
             preview_image: None,
             heightmap_data: None,
@@ -327,7 +329,60 @@ impl DayZMapApp {
 
     }
 
-    fn render_water_settings(&mut self, _ui: &mut egui::Ui) { /* lake threshold, river toggles */
+    fn render_water_settings(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) { /* water slider ranges */
+        ui.checkbox(&mut self.water_config.use_random_seed, "Use Random Seed");
+
+        if !self.water_config.use_random_seed {
+            ui.label("Seed:");
+            ui.add(egui::DragValue::new(&mut self.water_config.seed).speed(1));
+        } else {
+            ui.label(format!("Random Seed: {}", self.water_config.seed));
+        }
+
+        ui.separator();
+        ui.label("Lake Chance:");
+        ui.add(egui::Slider::new(&mut self.water_config.lake_chance, 0.0..=1.0).text("Lake Chance"));
+
+        ui.label("Lake Size:");
+        ui.add(egui::Slider::new(&mut self.water_config.lake_size, 0.0..=1.0).text("Lake Size"));
+
+        ui.label("River Count:");
+        ui.add(egui::Slider::new(&mut self.water_config.river_count, 0..=100).text("River Count"));
+
+        ui.label("River Width:");
+        ui.add(egui::Slider::new(&mut self.water_config.river_width, 0.0..=1.0).text("River Width"));
+
+        ui.label("River Momentum:");
+        ui.add(egui::Slider::new(&mut self.water_config.river_momentum, 0.0..=1.0).text("River Momentum"));
+
+        ui.label("River Direction Variation:");
+        ui.add(egui::Slider::new(&mut self.water_config.river_direction_variation, 0.0..=1.0).text("River Direction Variation"));
+
+        ui.label("Lake Drainage:");
+        ui.add(egui::Slider::new(&mut self.water_config.lake_drainage, 0.0..=1.0).text("Lake Drainage"));
+
+
+        if ui.button("Generate Water Map").clicked() {
+            if let Some(heightmap) = &self.heightmap_data {
+
+                let mut seed = self.water_config.seed;
+                if self.water_config.use_random_seed {
+                    seed = rand::random::<u32>();
+                    self.water_config.seed = seed;
+                }
+                /*
+                let (color_image, preview, biome)  = generate_biome_map(&self.config, &self.biome_config, heightmap, seed);
+                self.biome_map = Some(biome);
+                self.preview_texture = Some(ctx.load_texture("preview", color_image, egui::TextureOptions::default()));
+                self.preview_image = Some(preview);
+                */
+
+
+            } else {
+                ui.label("Please load a heightmap first.");
+            }
+        }
+
     }
 
 
@@ -390,7 +445,7 @@ impl eframe::App for DayZMapApp {
                     }
 
                     GenerationStep::Water => {
-                        self.render_water_settings(ui);
+                        self.render_water_settings(ui, ctx);
                     }
 
                     GenerationStep::Biomes => {

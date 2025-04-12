@@ -86,3 +86,31 @@ impl Default for BiomeConfig {
         }
     }
 }
+
+pub struct WaterConfig {
+    pub lake_chance: f32,
+    pub lake_size: f32,
+    pub river_count: u32,
+    pub river_width: f32,
+    pub river_momentum: f32,
+    pub river_direction_variation: f32,
+    pub lake_drainage: f32,
+    pub seed: u32,
+    pub use_random_seed: bool,
+}
+
+impl Default for WaterConfig {
+    fn default() -> Self {
+        Self {
+            lake_chance: 0.1,
+            lake_size: 0.1,
+            river_count: 10,
+            river_width: 0.05,
+            river_momentum: 0.5,
+            river_direction_variation: 0.1,
+            lake_drainage: 0.1,
+            seed: 32345,
+            use_random_seed: true,
+        }
+    }
+}
