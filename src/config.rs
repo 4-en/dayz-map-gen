@@ -60,3 +60,43 @@ impl Default for RefinerConfig {
         }
     }
 }
+
+pub struct BiomeConfig {
+    pub base_temperature: f32,
+    pub base_humidity: f32,
+    pub temperature_variation: f32,
+    pub humidity_variation: f32,
+    pub biome_blend_factor: f32,
+}
+
+impl Default for BiomeConfig {
+    fn default() -> Self {
+        Self {
+            base_temperature: 0.5,
+            base_humidity: 0.5,
+            temperature_variation: 0.1,
+            humidity_variation: 0.1,
+            biome_blend_factor: 0.5,
+        }
+    }
+}
+impl BiomeConfig {
+    pub fn new(base_temperature: f32, base_humidity: f32) -> Self {
+        Self {
+            base_temperature,
+            base_humidity,
+            ..Default::default()
+        }
+    }
+}
+impl BiomeConfig {
+    pub fn with_variation(base_temperature: f32, base_humidity: f32, temperature_variation: f32, humidity_variation: f32) -> Self {
+        Self {
+            base_temperature,
+            base_humidity,
+            temperature_variation,
+            humidity_variation,
+            ..Default::default()
+        }
+    }
+}

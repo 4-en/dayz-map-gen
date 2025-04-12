@@ -1,4 +1,6 @@
-use crate::{config::MapConfig, preview::get_color_for_height, terrain::generate_map, config::RefinerConfig, refiner::refine_heightmap};
+use crate::{preview::get_color_for_height, terrain::generate_map, refiner::refine_heightmap};
+use crate::config::{BiomeConfig, MapConfig, RefinerConfig};
+use crate::biomes::{Biome, generate_biome_map};
 use eframe::egui;
 use image::{ImageBuffer, Rgba};
 
@@ -31,9 +33,11 @@ pub struct DayZMapApp {
     current_step: GenerationStep,
     config: MapConfig,
     refiner_config: RefinerConfig,
+    biome_config: BiomeConfig,
     preview_texture: Option<egui::TextureHandle>,
     preview_image: Option<ImageBuffer<Rgba<u8>, Vec<u8>>>,
     heightmap_data: Option<Vec<f32>>,
+    biome_map: Option<Vec<Biome>>,
 }
 
 impl Default for DayZMapApp {
@@ -42,9 +46,11 @@ impl Default for DayZMapApp {
             current_step: GenerationStep::Terrain,
             config: MapConfig::default(),
             refiner_config: RefinerConfig::default(),
+            biome_config: BiomeConfig::default(),
             preview_texture: None,
             preview_image: None,
             heightmap_data: None,
+            biome_map: None,
         }
     }
 }
@@ -245,13 +251,37 @@ impl DayZMapApp {
                 egui::TextureOptions::default(),
             ));
             self.heightmap_data = Some(refined_heightmap);
-            
+
         }
     }
 
     fn render_water_settings(&mut self, _ui: &mut egui::Ui) { /* lake threshold, river toggles */
     }
-    fn render_biome_settings(&mut self, _ui: &mut egui::Ui) { /* biome slider ranges */
+    fn render_biome_settings(&mut self, ui: &mut egui::Ui) { /* biome slider ranges */
+
+        ui.label("Base Temperature:");
+        ui.add(egui::Slider::new(&mut self.biome_config.base_temperature, 0.0..=50.0).text("Base Temperature"));
+
+        ui.label("Temperature Variation:");
+        ui.add(egui::Slider::new(&mut self.biome_config.temperature_variation, 0.0..=50.0).text("Temperature Variation"));
+
+        ui.label("Base Humidity:");
+        ui.add(egui::Slider::new(&mut self.biome_config.base_humidity, 0.0..=100.0).text("Base Humidity"));
+
+        ui.label("Humidity Variation:");
+        ui.add(egui::Slider::new(&mut self.biome_config.humidity_variation, 0.0..=100.0).text("Humidity Variation"));
+
+        ui.label("Biome Blend Factor:");
+        ui.add(egui::Slider::new(&mut self.biome_config.biome_blend_factor, 0.0..=1.0).text("Biome Blend Factor"));
+
+
+        if ui.button("Generate Biome Map").clicked() {
+            if let Some(heightmap) = &self.heightmap_data {
+                let biome_map = generate_biome_map(&self.config, &self.biome_config, heightmap);
+                self.biome_map = Some(biome_map);
+            }
+        }
+
     }
     fn render_object_settings(&mut self, _ui: &mut egui::Ui) { /* trees, building densities */
     }

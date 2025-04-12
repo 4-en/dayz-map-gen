@@ -3,6 +3,7 @@ mod config;
 mod terrain;
 mod preview;
 mod refiner;
+mod biomes;
 
 fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions::default();
