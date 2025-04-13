@@ -90,29 +90,58 @@ impl Default for BiomeConfig {
 }
 
 pub struct WaterConfig {
-    pub lake_chance: f32,
-    pub lake_size: f32,
+    pub seed: u32,
+    pub use_random_seed: bool,
+    // lake generation
+    pub lake_attempts: u32,
+    pub min_lake_n: u32,
+    pub max_lake_n: u32,
+    pub min_elevation: f32,
+    pub max_elevation: f32,
+    pub min_capacity: f32,
+    pub max_capacity: f32,
+    pub min_depth: f32,
+    pub base_evaporation: f32,
+    pub base_inflow: f32,
+    pub base_drainage: f32,
+    pub biome_influence: f32,
+    pub lake_terrain_modification: f32,
+    // river generation
     pub river_count: u32,
     pub river_width: f32,
     pub river_momentum: f32,
     pub river_direction_variation: f32,
-    pub lake_drainage: f32,
-    pub seed: u32,
-    pub use_random_seed: bool,
+    pub river_speed: f32,
+    pub river_spread: f32,
+    pub river_depth: f32,
 }
 
 impl Default for WaterConfig {
     fn default() -> Self {
         Self {
-            lake_chance: 0.1,
-            lake_size: 0.1,
-            river_count: 10,
-            river_width: 0.05,
-            river_momentum: 0.5,
-            river_direction_variation: 0.1,
-            lake_drainage: 0.1,
             seed: 32345,
             use_random_seed: true,
+            lake_attempts: 100,
+            min_lake_n: 0,
+            max_lake_n: 100,
+            min_elevation: 0.0,
+            max_elevation: 1.0,
+            min_capacity: 10.0,
+            max_capacity: 1000000.0,
+            min_depth: 1.0,
+            base_evaporation: 50.0,
+            base_inflow: 50.0,
+            base_drainage: 50.0,
+            biome_influence: 50.0,
+            lake_terrain_modification: 10.0,
+            river_count: 10,
+            river_width: 50.0,
+            river_momentum: 50.0,
+            river_direction_variation: 10.0,
+            river_speed: 50.0,
+            river_spread: 50.0,
+            river_depth: 50.0,
+
         }
     }
 }

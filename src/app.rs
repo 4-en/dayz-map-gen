@@ -1,6 +1,6 @@
-use crate::{preview::get_color_for_height, terrain::generate_map, refiner::refine_heightmap};
-use crate::config::{BiomeConfig, MapConfig, RefinerConfig, WaterConfig};
 use crate::biomes::generate_biome_map;
+use crate::config::{BiomeConfig, MapConfig, RefinerConfig, WaterConfig};
+use crate::{preview::get_color_for_height, refiner::refine_heightmap, terrain::generate_map};
 use eframe::egui;
 use image::{ImageBuffer, Rgba};
 
@@ -92,8 +92,6 @@ impl DayZMapApp {
                     self.config.scale_base = (self.config.scale_base as f32 * size) as f64;
                     self.config.scale_mid = (self.config.scale_mid as f32 * size) as f64;
                     self.config.scale_detail = (self.config.scale_detail as f32 * size) as f64;
-
-
                 }
             }
         });
@@ -129,20 +127,48 @@ impl DayZMapApp {
         ui.heading("Noise Layers");
 
         ui.label("Base Noise");
-        ui.add(egui::Slider::new(&mut self.config.scale_base, 10.0..=10000.0).text("Scale").clamp_to_range(false));
-        ui.add(egui::Slider::new(&mut self.config.amp_base, 0.0..=2.0).text("Amp").clamp_to_range(false));
+        ui.add(
+            egui::Slider::new(&mut self.config.scale_base, 10.0..=10000.0)
+                .text("Scale")
+                .clamp_to_range(false),
+        );
+        ui.add(
+            egui::Slider::new(&mut self.config.amp_base, 0.0..=2.0)
+                .text("Amp")
+                .clamp_to_range(false),
+        );
 
         ui.label("Mid Noise");
-        ui.add(egui::Slider::new(&mut self.config.scale_mid, 10.0..=1000.0).text("Scale").clamp_to_range(false));
-        ui.add(egui::Slider::new(&mut self.config.amp_mid, 0.0..=2.0).text("Amp").clamp_to_range(false));
+        ui.add(
+            egui::Slider::new(&mut self.config.scale_mid, 10.0..=1000.0)
+                .text("Scale")
+                .clamp_to_range(false),
+        );
+        ui.add(
+            egui::Slider::new(&mut self.config.amp_mid, 0.0..=2.0)
+                .text("Amp")
+                .clamp_to_range(false),
+        );
 
         ui.label("Detail Noise");
-        ui.add(egui::Slider::new(&mut self.config.scale_detail, 5.0..=100.0).text("Scale").clamp_to_range(false));
-        ui.add(egui::Slider::new(&mut self.config.amp_detail, 0.0..=2.0).text("Amp").clamp_to_range(false));
+        ui.add(
+            egui::Slider::new(&mut self.config.scale_detail, 5.0..=100.0)
+                .text("Scale")
+                .clamp_to_range(false),
+        );
+        ui.add(
+            egui::Slider::new(&mut self.config.amp_detail, 0.0..=2.0)
+                .text("Amp")
+                .clamp_to_range(false),
+        );
 
         ui.separator();
         ui.label("Overlay Generation");
-        ui.add(egui::Slider::new(&mut self.config.overlay, 0.0..=100.0).text("Overlay Strength").clamp_to_range(false));
+        ui.add(
+            egui::Slider::new(&mut self.config.overlay, 0.0..=100.0)
+                .text("Overlay Strength")
+                .clamp_to_range(false),
+        );
 
         ui.horizontal(|ui| {
             if ui.button("Generate Map").clicked() {
@@ -154,7 +180,8 @@ impl DayZMapApp {
                     self.config.seed
                 };
 
-                let (color_image, preview_img, heightmap_data) = generate_map(&self.config, seed, &self.heightmap_data);
+                let (color_image, preview_img, heightmap_data) =
+                    generate_map(&self.config, seed, &self.heightmap_data);
                 self.preview_texture =
                     Some(ctx.load_texture("preview", color_image, egui::TextureOptions::default()));
                 self.preview_image = Some(preview_img);
@@ -210,7 +237,6 @@ impl DayZMapApp {
     }
 
     fn render_refine_settings(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) {
-
         // Curve controls
         ui.collapsing("Height Curve", |ui| {
             // Control points UI here
@@ -221,19 +247,31 @@ impl DayZMapApp {
         ui.add(egui::Slider::new(&mut self.config.sea_level, 0.0..=1.0).text("Sea Level"));
 
         ui.label("Height Offset:");
-        ui.add(egui::Slider::new(&mut self.refiner_config.height_offset, -1.0..=1.0).text("Height Offset"));
+        ui.add(
+            egui::Slider::new(&mut self.refiner_config.height_offset, -1.0..=1.0)
+                .text("Height Offset"),
+        );
 
         // coeff for height (height * coeff + offset)
         ui.label("Height Coefficient:");
-        ui.add(egui::Slider::new(&mut self.refiner_config.height_coeff, 0.0..=10.0).text("Height Coefficient"));
+        ui.add(
+            egui::Slider::new(&mut self.refiner_config.height_coeff, 0.0..=10.0)
+                .text("Height Coefficient"),
+        );
 
         // exp for height (height ^ exp + offset)
         ui.label("Height Exponent:");
-        ui.add(egui::Slider::new(&mut self.refiner_config.height_exponent, 0.0..=10.0).text("Height Exponent"));
+        ui.add(
+            egui::Slider::new(&mut self.refiner_config.height_exponent, 0.0..=10.0)
+                .text("Height Exponent"),
+        );
 
         // smoothness of the heightmap (0.0 = no smoothing, 1.0 = full smoothing)
         ui.label("Smoothing Factor:");
-        ui.add(egui::Slider::new(&mut self.refiner_config.smoothness, 0.0..=1.0).text("Smoothing Factor"));
+        ui.add(
+            egui::Slider::new(&mut self.refiner_config.smoothness, 0.0..=1.0)
+                .text("Smoothing Factor"),
+        );
 
         // TODO: connect this and add following features:
         // - smoothing factor (taking into account cliffs and other features)
@@ -241,7 +279,6 @@ impl DayZMapApp {
         // - Paint map overlay (load a texture and use it to modify the heightmap using "sculpting" tools like "raise/lower, smooth, etc.)"
         // - "live" preview using smaller texture (512x512) and a "preview" button to generate the full heightmap
         // - "Apply" button to apply the changes to the heightmap and update the preview
-
 
         if ui.button("Apply Refinement").clicked() {
             let refined_heightmap = refine_heightmap(
@@ -267,19 +304,14 @@ impl DayZMapApp {
                     .map(|p| egui::Color32::from_rgb(p[0], p[1], p[2]))
                     .collect(),
             };
-            self.preview_texture = Some(ctx.load_texture(
-                "preview",
-                color_image,
-                egui::TextureOptions::default(),
-            ));
+            self.preview_texture =
+                Some(ctx.load_texture("preview", color_image, egui::TextureOptions::default()));
             self.heightmap_data = Some(refined_heightmap);
-
         }
     }
 
-
-    fn render_biome_settings(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) { /* biome slider ranges */
-
+    fn render_biome_settings(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) {
+        /* biome slider ranges */
 
         ui.checkbox(&mut self.biome_config.use_random_seed, "Use Random Seed");
 
@@ -292,47 +324,64 @@ impl DayZMapApp {
 
         ui.separator();
         ui.label("Biome Scale:");
-        ui.add(egui::Slider::new(&mut self.biome_config.scale, 0.0..=20000.0).text("Biome Scale").clamp_to_range(false));
+        ui.add(
+            egui::Slider::new(&mut self.biome_config.scale, 0.0..=20000.0)
+                .text("Biome Scale")
+                .clamp_to_range(false),
+        );
 
         ui.label("Base Temperature:");
-        ui.add(egui::Slider::new(&mut self.biome_config.base_temperature, -10.0..=40.0).text("Base Temperature"));
+        ui.add(
+            egui::Slider::new(&mut self.biome_config.base_temperature, -10.0..=40.0)
+                .text("Base Temperature"),
+        );
 
         ui.label("Temperature Variation:");
-        ui.add(egui::Slider::new(&mut self.biome_config.temperature_variation, 0.0..=100.0).text("Temperature Variation"));
+        ui.add(
+            egui::Slider::new(&mut self.biome_config.temperature_variation, 0.0..=100.0)
+                .text("Temperature Variation"),
+        );
 
         ui.label("Base Humidity:");
-        ui.add(egui::Slider::new(&mut self.biome_config.base_humidity, 0.0..=100.0).text("Base Humidity"));
+        ui.add(
+            egui::Slider::new(&mut self.biome_config.base_humidity, 0.0..=100.0)
+                .text("Base Humidity"),
+        );
 
         ui.label("Humidity Variation:");
-        ui.add(egui::Slider::new(&mut self.biome_config.humidity_variation, 0.0..=100.0).text("Humidity Variation"));
+        ui.add(
+            egui::Slider::new(&mut self.biome_config.humidity_variation, 0.0..=100.0)
+                .text("Humidity Variation"),
+        );
 
         ui.label("Biome Blend Factor:");
-        ui.add(egui::Slider::new(&mut self.biome_config.biome_blend_factor, 0.0..=100.0).text("Biome Blend Factor"));
-
+        ui.add(
+            egui::Slider::new(&mut self.biome_config.biome_blend_factor, 0.0..=100.0)
+                .text("Biome Blend Factor"),
+        );
 
         if ui.button("Generate Biome Map").clicked() {
             if let Some(heightmap) = &self.heightmap_data {
-
                 let mut seed = self.biome_config.seed;
                 if self.biome_config.use_random_seed {
                     seed = rand::random::<u32>();
                     self.biome_config.seed = seed;
                 }
 
-                let (color_image, preview, biome)  = generate_biome_map(&self.config, &self.biome_config, heightmap, seed);
+                let (color_image, preview, biome) =
+                    generate_biome_map(&self.config, &self.biome_config, heightmap, seed);
                 self.biome_map = Some(biome);
-                self.preview_texture = Some(ctx.load_texture("preview", color_image, egui::TextureOptions::default()));
+                self.preview_texture =
+                    Some(ctx.load_texture("preview", color_image, egui::TextureOptions::default()));
                 self.preview_image = Some(preview);
-
-
             } else {
                 ui.label("Please load a heightmap first.");
             }
         }
-
     }
 
-    fn render_water_settings(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) { /* water slider ranges */
+    fn render_water_settings(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) {
+        /* water slider ranges */
         ui.checkbox(&mut self.water_config.use_random_seed, "Use Random Seed");
 
         if !self.water_config.use_random_seed {
@@ -343,31 +392,110 @@ impl DayZMapApp {
         }
 
         ui.separator();
-        ui.label("Lake Chance:");
-        ui.add(egui::Slider::new(&mut self.water_config.lake_chance, 0.0..=1.0).text("Lake Chance"));
+        ui.heading("Lake Generation");
+        ui.label("Lake Attempts:");
+        ui.add(
+            egui::Slider::new(&mut self.water_config.lake_attempts, 0..=100).text("Lake Attempts"),
+        );
+        ui.label("Minimum Lake Number:");
+        ui.add(
+            egui::Slider::new(&mut self.water_config.min_lake_n, 0..=100)
+                .text("Minimum Lake Number"),
+        );
+        ui.label("Maximum Lake Number:");
+        ui.add(
+            egui::Slider::new(&mut self.water_config.max_lake_n, 0..=100)
+                .text("Maximum Lake Number"),
+        );
+        ui.label("Minimum Elevation:");
+        ui.add(
+            egui::Slider::new(&mut self.water_config.min_elevation, 0.0..=1.0)
+                .text("Minimum Elevation"),
+        );
+        ui.label("Maximum Elevation:");
+        ui.add(
+            egui::Slider::new(&mut self.water_config.max_elevation, 0.0..=1.0)
+                .text("Maximum Elevation"),
+        );
+        ui.label("Minimum Capacity:");
+        ui.add(
+            egui::Slider::new(&mut self.water_config.min_capacity, 0.0..=1000000.0)
+                .text("Minimum Capacity"),
+        );
+        ui.label("Maximum Capacity:");
+        ui.add(
+            egui::Slider::new(&mut self.water_config.max_capacity, 0.0..=1000000.0)
+                .text("Maximum Capacity"),
+        );
+        ui.label("Minimum Depth:");
+        ui.add(
+            egui::Slider::new(&mut self.water_config.min_depth, 0.0..=100.0).text("Minimum Depth"),
+        );
+        ui.label("Base Evaporation:");
+        ui.add(
+            egui::Slider::new(&mut self.water_config.base_evaporation, 0.0..=100.0)
+                .text("Base Evaporation"),
+        );
+        ui.label("Base Inflow:");
+        ui.add(
+            egui::Slider::new(&mut self.water_config.base_inflow, 0.0..=100.0).text("Base Inflow"),
+        );
+        ui.label("Base Drainage:");
+        ui.add(
+            egui::Slider::new(&mut self.water_config.base_drainage, 0.0..=100.0)
+                .text("Base Drainage"),
+        );
+        ui.label("Biome Influence:");
+        ui.add(
+            egui::Slider::new(&mut self.water_config.biome_influence, 0.0..=100.0)
+                .text("Biome Influence"),
+        );
+        ui.label("Lake Terrain Modification:");
+        ui.add(
+            egui::Slider::new(
+                &mut self.water_config.lake_terrain_modification,
+                0.0..=100.0,
+            )
+            .text("Lake Terrain Modification"),
+        );
 
-        ui.label("Lake Size:");
-        ui.add(egui::Slider::new(&mut self.water_config.lake_size, 0.0..=1.0).text("Lake Size"));
-
+        ui.separator();
+        ui.heading("River Generation");
         ui.label("River Count:");
         ui.add(egui::Slider::new(&mut self.water_config.river_count, 0..=100).text("River Count"));
-
         ui.label("River Width:");
-        ui.add(egui::Slider::new(&mut self.water_config.river_width, 0.0..=1.0).text("River Width"));
-
+        ui.add(
+            egui::Slider::new(&mut self.water_config.river_width, 0.0..=100.0).text("River Width"),
+        );
         ui.label("River Momentum:");
-        ui.add(egui::Slider::new(&mut self.water_config.river_momentum, 0.0..=1.0).text("River Momentum"));
-
+        ui.add(
+            egui::Slider::new(&mut self.water_config.river_momentum, 0.0..=100.0)
+                .text("River Momentum"),
+        );
         ui.label("River Direction Variation:");
-        ui.add(egui::Slider::new(&mut self.water_config.river_direction_variation, 0.0..=1.0).text("River Direction Variation"));
-
-        ui.label("Lake Drainage:");
-        ui.add(egui::Slider::new(&mut self.water_config.lake_drainage, 0.0..=1.0).text("Lake Drainage"));
-
+        ui.add(
+            egui::Slider::new(
+                &mut self.water_config.river_direction_variation,
+                0.0..=100.0,
+            )
+            .text("River Direction Variation"),
+        );
+        ui.label("River Speed:");
+        ui.add(
+            egui::Slider::new(&mut self.water_config.river_speed, 0.0..=100.0).text("River Speed"),
+        );
+        ui.label("River Spread:");
+        ui.add(
+            egui::Slider::new(&mut self.water_config.river_spread, 0.0..=100.0)
+                .text("River Spread"),
+        );
+        ui.label("River Depth:");
+        ui.add(
+            egui::Slider::new(&mut self.water_config.river_depth, 0.0..=100.0).text("River Depth"),
+        );
 
         if ui.button("Generate Water Map").clicked() {
             if let Some(heightmap) = &self.heightmap_data {
-
                 let mut seed = self.water_config.seed;
                 if self.water_config.use_random_seed {
                     seed = rand::random::<u32>();
@@ -379,15 +507,11 @@ impl DayZMapApp {
                 self.preview_texture = Some(ctx.load_texture("preview", color_image, egui::TextureOptions::default()));
                 self.preview_image = Some(preview);
                 */
-
-
             } else {
                 ui.label("Please load a heightmap first.");
             }
         }
-
     }
-
 
     fn render_object_settings(&mut self, _ui: &mut egui::Ui) { /* trees, building densities */
     }
@@ -438,31 +562,33 @@ impl eframe::App for DayZMapApp {
 
                 ui.separator();
 
-                match self.current_step {
-                    GenerationStep::Terrain => {
-                        self.render_terrain_settings(ui, ctx);
-                    }
+                egui::ScrollArea::vertical()
+                    .max_height(ui.available_height() - 50.0)
+                    .show(ui, |ui| match self.current_step {
+                        GenerationStep::Terrain => {
+                            self.render_terrain_settings(ui, ctx);
+                        }
 
-                    GenerationStep::Refinement => {
-                        self.render_refine_settings(ui, ctx);
-                    }
+                        GenerationStep::Refinement => {
+                            self.render_refine_settings(ui, ctx);
+                        }
 
-                    GenerationStep::Water => {
-                        self.render_water_settings(ui, ctx);
-                    }
+                        GenerationStep::Water => {
+                            self.render_water_settings(ui, ctx);
+                        }
 
-                    GenerationStep::Biomes => {
-                        self.render_biome_settings(ui, ctx);
-                    }
+                        GenerationStep::Biomes => {
+                            self.render_biome_settings(ui, ctx);
+                        }
 
-                    GenerationStep::Objects => {
-                        self.render_object_settings(ui);
-                    }
+                        GenerationStep::Objects => {
+                            self.render_object_settings(ui);
+                        }
 
-                    GenerationStep::Export => {
-                        self.render_export_panel(ui);
-                    }
-                }
+                        GenerationStep::Export => {
+                            self.render_export_panel(ui);
+                        }
+                    });
 
                 egui::TopBottomPanel::bottom("nav_bar").show(ctx, |ui| {
                     ui.horizontal_centered(|ui| {
@@ -495,27 +621,27 @@ impl eframe::App for DayZMapApp {
                 });
             });
 
-            egui::CentralPanel::default().show(ctx, |ui| {
-                if let Some(texture) = &self.preview_texture {
-                    let available_size = ui.available_size();
-                    let image_size = texture.size_vec2();
-                    let scale = {
-                        let w_ratio = available_size.x / image_size.x;
-                        let h_ratio = available_size.y / image_size.y;
-                        w_ratio.min(h_ratio).min(1.0)
-                    };
-                    let scaled_size = image_size * scale;
-            
-                    // Center the image using manual layout
-                    ui.vertical_centered(|ui| {
-                        ui.add_space((available_size.y - scaled_size.y).max(0.0) / 2.0); // vertical centering
-                        ui.horizontal_centered(|ui| {
-                            ui.image(texture, scaled_size);
-                        });
+        egui::CentralPanel::default().show(ctx, |ui| {
+            if let Some(texture) = &self.preview_texture {
+                let available_size = ui.available_size();
+                let image_size = texture.size_vec2();
+                let scale = {
+                    let w_ratio = available_size.x / image_size.x;
+                    let h_ratio = available_size.y / image_size.y;
+                    w_ratio.min(h_ratio).min(1.0)
+                };
+                let scaled_size = image_size * scale;
+
+                // Center the image using manual layout
+                ui.vertical_centered(|ui| {
+                    ui.add_space((available_size.y - scaled_size.y).max(0.0) / 2.0); // vertical centering
+                    ui.horizontal_centered(|ui| {
+                        ui.image(texture, scaled_size);
                     });
-                } else {
-                    ui.label("Press 'Generate Map' to create a new map preview.");
-                }
-            });
+                });
+            } else {
+                ui.label("Press 'Generate Map' to create a new map preview.");
+            }
+        });
     }
 }
