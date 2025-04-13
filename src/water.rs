@@ -8,6 +8,64 @@ use rand::{
     rngs::StdRng,
 };
 
+pub fn get_color_for_water(value: f32) -> (u8, u8, u8) {
+    let blue = (value * 255.0).clamp(0.0, 255.0) as u8;
+    let green = ((1.0 - value) * 255.0).clamp(0.0, 255.0) as u8;
+    (blue, green, 255)
+}
+
+pub fn generate_lake_at(
+    map_config: &MapConfig,
+    water_config: &WaterConfig,
+    heightmap: &[f32],
+    lake_map: &mut [f32],
+    x: f32,
+    y: f32
+) -> bool {
+    let width = map_config.width as f32;
+    let height = map_config.height as f32;
+    
+    // try to generate a lake by searching for bowl at given coordinates
+    // basically a flood fill algorithm
+
+    // 1. find a local minimum in the heightmap
+    let mut center_x = x as i32;
+    let mut center_y = y as i32;
+    // TODO: set center to nearest local minimum in heightmap
+
+    // abort if one of the following conditions is met:
+    // - center is out of bounds
+    // - center is too low or too high (check config)
+    // - center is already part of a lake
+
+    // 2. flood fill the area around the center
+    // - find next lowest neighbor (4 directions)
+    // - set new lake height to the new neighbor height if heigher than last lake height
+    // - add all neighbors lower than the lake height
+    // - repeat until stop condition is met
+
+    // stop on one of the following conditions:
+    // - the area is too big (radius)
+    // - the area is too deep
+    // when stopped, go back to last valid lake
+
+    // 3. lower lake height by a random amount (config)
+
+    // 4. check all points of the lake
+
+    // 5. apply heightmap modification (slightly lower the heightmap in the lake area)
+
+    // 6. expand lake area by 1 pixel in all directions (since height map precision is 1m/pixel, the actual intersection is somewhere between the pixel below and above the lake)
+
+    // 7. add lake to the lake map (using lake height for aal pixels in the lake area)
+    
+    // 8. return true if lake was generated, false if not
+
+    
+    false
+}
+
+
 
 pub fn generate_water_map(
     map_config: &MapConfig,
