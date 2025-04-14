@@ -1,6 +1,7 @@
 use crate::biomes::generate_biome_map;
 use crate::config::{BiomeConfig, MapConfig, RefinerConfig, WaterConfig};
 use crate::{preview::get_color_for_height, refiner::refine_heightmap, terrain::generate_map};
+use crate::utils::export_heightmap_to_asc;
 use eframe::egui;
 use image::{ImageBuffer, Rgba};
 
@@ -529,15 +530,21 @@ impl DayZMapApp {
             if let (Some(data), w, h) =
                 (&self.heightmap_data, self.config.width, self.config.height)
             {
-                use image::{GrayImage, Luma};
-                let mut img = GrayImage::new(w, h);
-                for (i, val) in data.iter().enumerate() {
-                    let x = (i as u32) % w;
-                    let y = (i as u32) / w;
-                    let intensity = (val * 255.0).clamp(0.0, 255.0) as u8;
-                    img.put_pixel(x, y, Luma([intensity]));
+                let filename = format!("heightmap_{}x{}.asc", w, h);
+                if let Err(e) = export_heightmap_to_asc(
+                    data,
+                    w,
+                    h,
+                    &filename,
+                    0.0,
+                    1000.0,
+                ) {
+                    eprintln!("Error exporting heightmap: {}", e);
+                } else {
+                    println!("Heightmap exported to {}", filename);
                 }
-                let _ = img.save("export_heightmap.png");
+            } else {
+                ui.label("Please generate a heightmap first.");
             }
         }
     }

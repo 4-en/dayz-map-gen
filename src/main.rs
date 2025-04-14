@@ -5,6 +5,7 @@ mod preview;
 mod refiner;
 mod biomes;
 mod water;
+mod utils;
 
 fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions::default();
