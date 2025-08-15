@@ -1,6 +1,8 @@
 ﻿# DayZ Map Generator
 A basic rust based dayz map generator with a straightforward GUI.
 
+## Warning: very WIP
+
 # Features
 Functions to generate and export some assets for DayZ Terrain Builder:
 - noise based heightmap with multiple customizable parameters and refinement tools
@@ -33,3 +35,4 @@ cargo run --release
 
 # Usage
 TODO: explain some basic functions with examples
+
